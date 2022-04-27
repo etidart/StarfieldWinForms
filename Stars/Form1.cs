@@ -37,14 +37,26 @@ namespace Stars
             foreach (var star in stars)
             {
                 DrawStar(star);
+                MoveStar(star);
             }
 
             pictureBox1.Refresh();
         }
 
+        private void MoveStar(Star star)
+        {
+            star.Z -= 10;
+            if (star.Z < 1)
+            {
+                star.X = random.Next(-pictureBox1.Width, pictureBox1.Width);
+                star.Y = random.Next(-pictureBox1.Height, pictureBox1.Height);
+                star.Z = random.Next(1, pictureBox1.Width);
+            }
+        }
+
         private void DrawStar(Star star)
         {
-            float starSize = 7;
+            float starSize = Remap(star.Z, 0, pictureBox1.Width, 7, 0);
 
             float x = Remap(star.X / star.Z, 0, 1, 0, pictureBox1.Width) + pictureBox1.Width / 2;
             float y = Remap(star.Y / star.Z, 0, 1, 0, pictureBox1.Height) + pictureBox1.Height / 2;
