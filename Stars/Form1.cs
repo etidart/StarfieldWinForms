@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -14,9 +15,41 @@ namespace Stars
     {
         public class Star
         {
+            private static Random rnd = new Random();
             public float X { get; set; }
             public float Y { get; set; }
             public float Z { get; set; }
+            public Brush color { get; set; }
+
+            public Star(int width, int height)
+            {
+                X = rnd.Next(-width, width);
+                Y = rnd.Next(-height, height);
+                Z = rnd.Next(1, width);
+                color = GetRandomBrush();
+            }
+
+            private Brush GetRandomBrush()
+            {
+                Brush result = Brushes.Transparent;
+
+                Type brushesType = typeof(Brushes);
+
+                PropertyInfo[] properties = brushesType.GetProperties();
+
+                int random = rnd.Next(properties.Length);
+                result = (Brush)properties[random].GetValue(null, null);
+
+                return result;
+            }
+
+            public void ResetStar(int width, int height)
+            {
+                X = rnd.Next(-width, width);
+                Y = rnd.Next(-height, height);
+                Z = rnd.Next(1, width);
+                color = GetRandomBrush();
+            }
         }
 
         private Star[] stars = new Star[15000];
@@ -48,9 +81,7 @@ namespace Stars
             star.Z -= 10;
             if (star.Z < 1)
             {
-                star.X = random.Next(-pictureBox1.Width, pictureBox1.Width);
-                star.Y = random.Next(-pictureBox1.Height, pictureBox1.Height);
-                star.Z = random.Next(1, pictureBox1.Width);
+                star.ResetStar(pictureBox1.Width, pictureBox1.Height);
             }
         }
 
@@ -61,7 +92,7 @@ namespace Stars
             float x = Remap(star.X / star.Z, 0, 1, 0, pictureBox1.Width) + pictureBox1.Width / 2;
             float y = Remap(star.Y / star.Z, 0, 1, 0, pictureBox1.Height) + pictureBox1.Height / 2;
 
-            graphics.FillEllipse(Brushes.YellowGreen, x, y, starSize, starSize);
+            graphics.FillEllipse(star.color, x, y, starSize, starSize);
         }
 
         private float Remap(float n, float start1, float end1, float start2, float end2)
@@ -79,12 +110,7 @@ namespace Stars
 
             for (int i = 0; i < stars.Length; i++)
             {
-                stars[i] = new Star()
-                {
-                    X = random.Next(-pictureBox1.Width, pictureBox1.Width),
-                    Y = random.Next(-pictureBox1.Height, pictureBox1.Height),
-                    Z = random.Next(1, pictureBox1.Width)
-                };
+                stars[i] = new Star(pictureBox1.Width, pictureBox1.Height);
             }
 
             timer1.Start();
